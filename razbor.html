@@ -131,6 +131,49 @@
 
   h1:focus { outline: none; }
 
+  .progress {
+    font-size: 15px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .points { margin: 0 0 32px; }
+  .point { padding: 20px 0; border-top: 1px solid var(--line); }
+  .point h2 {
+    font: 600 19px/1.3 var(--sans);
+    margin: 0 0 8px;
+  }
+  .point p:last-child { margin-bottom: 0; }
+
+  .case {
+    background: var(--bg-alt);
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+  .case .label { margin-bottom: 8px; }
+  .case p:last-child { margin-bottom: 0; }
+
+  .note {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 24px;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 24px;
+    margin-top: 16px;
+  }
+  .links .back { margin-top: 0; }
+
+  section:not([hidden]) { animation: appear .2s ease-out; }
+  @keyframes appear { from { opacity: 0; } to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    section:not([hidden]) { animation: none; }
+  }
+
   [hidden] { display: none !important; }
 
   @media (max-width: 600px) {
@@ -153,6 +196,7 @@
 
     <section id="screen-pick" hidden>
       <p class="label">Разбор процесса</p>
+      <p class="progress">Вопрос 1 из 4</p>
       <h1 tabindex="-1">Какой процесс отнимает больше всего времени?</h1>
       <p class="lead">Выберите один&nbsp;— покажу, что можно отдать ИИ, что оставить людям и&nbsp;с&nbsp;чего начать.</p>
       <ul class="options" id="process-list"></ul>
@@ -172,6 +216,43 @@
       <p class="lead">Пока можно вернуться к&nbsp;списку или выбрать «Другое» и&nbsp;написать мне напрямую.</p>
       <button class="back" type="button" data-back><span class="emoji" aria-hidden="true">👈</span>К списку процессов</button>
     </section>
+
+    <section id="screen-question" hidden>
+      <p class="label" id="question-process"></p>
+      <p class="progress" id="question-progress"></p>
+      <h1 tabindex="-1" id="question-title"></h1>
+      <ul class="options" id="answer-list"></ul>
+      <button class="back" type="button" id="question-back"><span class="emoji" aria-hidden="true">👈</span>Назад</button>
+    </section>
+
+    <section id="screen-result" hidden>
+      <p class="label">Разбор процесса</p>
+      <h1 tabindex="-1" id="result-title"></h1>
+      <div class="points">
+        <div class="point">
+          <h2><span class="emoji" aria-hidden="true">🤖</span>Отдать ИИ</h2>
+          <div id="result-ai"></div>
+        </div>
+        <div class="point">
+          <h2><span class="emoji" aria-hidden="true">🧑</span>Оставить человеку</h2>
+          <div id="result-human"></div>
+        </div>
+        <div class="point">
+          <h2><span class="emoji" aria-hidden="true">👣</span>С чего начать</h2>
+          <div id="result-start"></div>
+        </div>
+      </div>
+      <div class="case">
+        <p class="label" id="case-label"></p>
+        <p id="case-text"></p>
+      </div>
+      <p class="note">Разбор собран по готовым правилам из моего опыта, это не ответ ИИ.</p>
+      <a class="btn btn--wide" id="result-telegram" href="#"><span class="emoji" aria-hidden="true">✈️</span>Обсудить с Анатолем в Telegram</a>
+      <div class="links">
+        <button class="back" type="button" data-back><span class="emoji" aria-hidden="true">🔄</span>Пройти заново</button>
+        <a class="back home-link" href="index.html"><span class="emoji" aria-hidden="true">🏠</span>На главную</a>
+      </div>
+    </section>
   </div>
 </main>
 <script>
@@ -183,9 +264,73 @@
     { id: "other", emoji: "🤔", title: "Другое" }
   ];
 
-  function telegramLink(process) {
-    var text = "Здравствуйте! Я со страницы разбора процесса. Процесс: " + process + ". Хочу обсудить: ";
-    return "https://t.me/ahtlv?text=" + encodeURIComponent(text);
+  var QUESTIONS = [
+    { id: "hours", title: "Сколько часов в неделю на это уходит?", options: [
+      { id: "lt5", title: "До 5" },
+      { id: "5to20", title: "5–20" },
+      { id: "gt20", title: "Больше 20" }
+    ] },
+    { id: "data", title: "Где сейчас лежат данные?", options: [
+      { id: "excel", title: "Excel или таблицы" },
+      { id: "mail", title: "Почта и мессенджеры" },
+      { id: "1c", title: "1С или другая учётная программа" },
+      { id: "paper", title: "В головах и на бумаге" }
+    ] },
+    { id: "who", title: "Кто это делает сейчас?", options: [
+      { id: "me", title: "Я сам" },
+      { id: "one", title: "Один сотрудник" },
+      { id: "many", title: "Несколько сотрудников" },
+      { id: "contractors", title: "Подрядчики" }
+    ] }
+  ];
+
+  // Разбор = базовый текст процесса + добавки по ответам. Ветвление по правилам, не генерация.
+  var RAZBOR = {
+    kp: {
+      ai: "Первичный расчёт по заявке или проекту клиента и аккуратное коммерческое предложение с ведомостью работ.",
+      human: "Проверку точного расчёта, когда условия устраивают клиента, решения по цене и нестандартные заявки. Последнее слово за человеком.",
+      start: "Возьмите одну типовую заявку и распишите по шагам, как из неё получается КП: что смотрите, что считаете, откуда берёте цены.",
+      add: {
+        hours: {
+          lt5: { ai: "При таком объёме главный выигрыш не в часах, а в скорости: клиент не ждёт, пока до его заявки дойдут руки." },
+          "5to20": { ai: "Это заметная часть рабочей недели. Если черновой расчёт делает ИИ, у человека остаётся время на проверку и разговор с клиентом." },
+          gt20: { ai: "Больше 20 часов в неделю — это половина рабочей ставки. Здесь эффект самый заметный: человек перестаёт считать каждую заявку с нуля и только проверяет." }
+        },
+        data: {
+          excel: { start: "Таблицы — удобная основа. Соберите в одну прошлые расчёты и КП: по ним видно, как у вас принято считать." },
+          mail: {
+            ai: "Ещё ИИ может разбирать заявки из почты и мессенджеров и вытаскивать из них главное: что нужно, сколько и к какому сроку.",
+            start: "Соберите в одну папку несколько прошлых заявок из почты и мессенджеров вместе с КП, которые по ним отправили."
+          },
+          "1c": { start: "Честно: подключение к 1С — отдельная задача, удобного способа подключиться к ней нет. Для начала хватит выгрузки цен в таблицу." },
+          paper: { start: "Первый шаг — записать процесс. Пока правила расчёта живут в голове, ИИ не на что опереться." }
+        },
+        who: {
+          me: { human: "Пока считаете вы сами, на вас и остаётся проверка, но уже готового черновика, а не пустого листа." },
+          one: { human: "Если считает один человек, всё встаёт, когда он болеет или занят. С первичной оценкой от ИИ заявки не ждут его, а он проверяет и решает." },
+          many: { human: "Когда считают несколько человек, у каждого свой подход. Общие правила записываются один раз, и черновики у всех выходят по одним правилам." },
+          contractors: { human: "ИИ может заменить часть работы подрядчиков: типовые расчёты делаются у вас, внешним исполнителям остаются сложные." }
+        }
+      },
+      caseLabel: "Как я это делал · Анатоль",
+      caseText: "Компания сдаёт опалубку в аренду и сама рассчитывает по проекту клиента, какая опалубка нужна и сколько, — это её преимущество. Раньше всё считал один инженер: он мог заболеть, времени не хватало, мог ошибиться. Теперь первичную оценку по запросу или проекту делает ИИ с погрешностью около 15%, а точный расчёт перепроверяет инженер, если условия клиента устраивают. Клиент сразу получает аккуратное коммерческое предложение и ведомость работ. Нагрузка на инженера ниже, последнее слово за человеком."
+    }
+  };
+
+  var state = { process: null, step: 0, answers: {} };
+
+  function lower(t) {
+    return /^Excel/.test(t) ? t : t.charAt(0).toLowerCase() + t.slice(1);
+  }
+
+  function telegramLink(process, answers) {
+    var text = "Здравствуйте! Я со страницы разбора процесса. Процесс: " + process;
+    if (answers) {
+      text += "; времени в неделю: " + lower(answers.hours) +
+        "; данные: " + lower(answers.data) +
+        "; делает: " + lower(answers.who);
+    }
+    return "https://t.me/ahtlv?text=" + encodeURIComponent(text + ". Хочу обсудить: ");
   }
 
   function show(id) {
@@ -196,25 +341,95 @@
     if (heading) heading.focus();
   }
 
-  var list = document.getElementById("process-list");
-  PROCESSES.forEach(function (p) {
+  function optionButton(emoji, title, onClick) {
     var li = document.createElement("li");
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "option";
-    btn.innerHTML = '<span class="emoji" aria-hidden="true">' + p.emoji + "</span>";
-    btn.appendChild(document.createTextNode(p.title));
-    btn.addEventListener("click", function () {
+    if (emoji) btn.innerHTML = '<span class="emoji" aria-hidden="true">' + emoji + "</span>";
+    btn.appendChild(document.createTextNode(title));
+    btn.addEventListener("click", onClick);
+    li.appendChild(btn);
+    return li;
+  }
+
+  function showQuestion() {
+    var q = QUESTIONS[state.step];
+    document.getElementById("question-process").textContent = state.process.title;
+    document.getElementById("question-progress").textContent = "Вопрос " + (state.step + 2) + " из 4";
+    document.getElementById("question-title").textContent = q.title;
+    var answers = document.getElementById("answer-list");
+    answers.innerHTML = "";
+    q.options.forEach(function (o) {
+      answers.appendChild(optionButton(null, o.title, function () {
+        state.answers[q.id] = o;
+        if (state.step < QUESTIONS.length - 1) {
+          state.step++;
+          showQuestion();
+        } else {
+          showResult();
+        }
+      }));
+    });
+    show("screen-question");
+  }
+
+  function fill(id, parts) {
+    var box = document.getElementById(id);
+    box.innerHTML = "";
+    parts.forEach(function (t) {
+      var p = document.createElement("p");
+      p.textContent = t;
+      box.appendChild(p);
+    });
+  }
+
+  function showResult() {
+    var r = RAZBOR[state.process.id];
+    var parts = { ai: [r.ai], human: [r.human], start: [r.start] };
+    QUESTIONS.forEach(function (q) {
+      var extra = r.add[q.id][state.answers[q.id].id];
+      ["ai", "human", "start"].forEach(function (k) {
+        if (extra[k]) parts[k].push(extra[k]);
+      });
+    });
+    document.getElementById("result-title").textContent = state.process.title;
+    fill("result-ai", parts.ai);
+    fill("result-human", parts.human);
+    fill("result-start", parts.start);
+    document.getElementById("case-label").textContent = r.caseLabel;
+    document.getElementById("case-text").textContent = r.caseText;
+    document.getElementById("result-telegram").href = telegramLink(state.process.title, {
+      hours: state.answers.hours.title,
+      data: state.answers.data.title,
+      who: state.answers.who.title
+    });
+    show("screen-result");
+  }
+
+  document.getElementById("question-back").addEventListener("click", function () {
+    if (state.step > 0) {
+      state.step--;
+      showQuestion();
+    } else {
+      show("screen-pick");
+    }
+  });
+
+  var list = document.getElementById("process-list");
+  PROCESSES.forEach(function (p) {
+    list.appendChild(optionButton(p.emoji, p.title, function () {
       if (p.id === "other") {
         document.getElementById("other-telegram").href = telegramLink(p.title);
         show("screen-other");
+      } else if (RAZBOR[p.id]) {
+        state = { process: p, step: 0, answers: {} };
+        showQuestion();
       } else {
         document.getElementById("soon-label").textContent = p.title;
         show("screen-soon");
       }
-    });
-    li.appendChild(btn);
-    list.appendChild(li);
+    }));
   });
 
   document.querySelectorAll("[data-back]").forEach(function (b) {

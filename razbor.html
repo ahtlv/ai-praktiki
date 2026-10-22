@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Разбор процесса — ИИ-практики из Беларуси</title>
+<meta name="description" content="Выберите процесс в своём бизнесе и посмотрите, что можно отдать ИИ, что оставить людям и с чего начать.">
+<style>
+  :root {
+    --bg: #FAF6F0;
+    --bg-alt: #F1E7DA;
+    --line: #E8DFD3;
+    --text: #2B2622;
+    --muted: #5C534C;
+    --accent: #B4532A;
+    --accent-ink: #9A4420;
+    --serif: Georgia, "Times New Roman", serif;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html { -webkit-text-size-adjust: 100%; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font: 17px/1.6 var(--sans);
+    overflow-wrap: break-word;
+  }
+
+  h1 {
+    font-family: var(--serif);
+    font-weight: normal;
+    margin: 0 0 16px;
+    text-wrap: balance;
+    font-size: clamp(28px, 7vw, 40px);
+    line-height: 1.15;
+  }
+  p { margin: 0 0 16px; }
+
+  .wrap {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px;
+  }
+
+  header { padding: 20px 0; border-bottom: 1px solid var(--line); }
+  main { padding: 48px 0 56px; }
+
+  .home-link {
+    color: var(--accent-ink);
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .home-link:hover { text-decoration: underline; }
+
+  .label {
+    font: 600 13px/1.4 var(--sans);
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .lead {
+    font-size: 19px;
+    color: var(--muted);
+    margin-bottom: 28px;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 48px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    font: 600 17px/1.2 var(--sans);
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--accent-ink); }
+  .btn--wide { display: flex; width: 100%; }
+
+  .options {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+  }
+  .option {
+    display: block;
+    width: 100%;
+    min-height: 56px;
+    padding: 14px 18px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    font: 17px/1.3 var(--sans);
+    text-align: left;
+    cursor: pointer;
+  }
+  .option:hover { border-color: var(--accent); background: var(--bg-alt); }
+
+  .back {
+    margin-top: 24px;
+    padding: 12px 0;
+    border: 0;
+    background: none;
+    color: var(--accent-ink);
+    font: 600 17px/1.2 var(--sans);
+    cursor: pointer;
+  }
+  .back:hover { text-decoration: underline; }
+
+  .btn:focus-visible, .option:focus-visible, .back:focus-visible, .home-link:focus-visible {
+    outline: 3px solid var(--text);
+    outline-offset: 3px;
+  }
+
+  .emoji { margin-right: .5em; font-style: normal; }
+  .option .emoji { display: inline-block; width: 1.6em; margin-right: .4em; text-align: center; }
+
+  h1:focus { outline: none; }
+
+  [hidden] { display: none !important; }
+
+  @media (max-width: 600px) {
+    main { padding: 32px 0 40px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap"><a class="home-link" href="index.html"><span class="emoji" aria-hidden="true">🏠</span>На главную</a></div>
+</header>
+<main>
+  <div class="wrap">
+    <noscript>
+      <p class="label">Разбор процесса</p>
+      <h1>Расскажите о своём процессе в Telegram</h1>
+      <p class="lead">Напишите, какой процесс в бизнесе отнимает больше всего времени,&nbsp;— разберу лично.</p>
+      <a class="btn btn--wide" href="https://t.me/ahtlv?text=%D0%97%D0%B4%D1%80%D0%B0%D0%B2%D1%81%D1%82%D0%B2%D1%83%D0%B9%D1%82%D0%B5%21%20%D0%AF%20%D1%81%D0%BE%20%D1%81%D1%82%D1%80%D0%B0%D0%BD%D0%B8%D1%86%D1%8B%20%D1%80%D0%B0%D0%B7%D0%B1%D0%BE%D1%80%D0%B0%20%D0%BF%D1%80%D0%BE%D1%86%D0%B5%D1%81%D1%81%D0%B0.%20%D0%A5%D0%BE%D1%87%D1%83%20%D0%BE%D0%B1%D1%81%D1%83%D0%B4%D0%B8%D1%82%D1%8C%3A%20"><span class="emoji" aria-hidden="true">✈️</span>Написать в Telegram</a>
+    </noscript>
+
+    <section id="screen-pick" hidden>
+      <p class="label">Разбор процесса</p>
+      <h1 tabindex="-1">Какой процесс отнимает больше всего времени?</h1>
+      <p class="lead">Выберите один&nbsp;— покажу, что можно отдать ИИ, что оставить людям и&nbsp;с&nbsp;чего начать.</p>
+      <ul class="options" id="process-list"></ul>
+    </section>
+
+    <section id="screen-other" hidden>
+      <p class="label">Другое</p>
+      <h1 tabindex="-1">Опишите задачу в Telegram, разберу лично</h1>
+      <p class="lead">Похожего случая у&nbsp;меня пока нет. Напишите в&nbsp;двух словах, какой процесс хотите разгрузить,&nbsp;— отвечу сам.</p>
+      <a class="btn btn--wide" id="other-telegram" href="#"><span class="emoji" aria-hidden="true">✈️</span>Обсудить с Анатолем в Telegram</a>
+      <button class="back" type="button" data-back><span class="emoji" aria-hidden="true">👈</span>К списку процессов</button>
+    </section>
+
+    <section id="screen-soon" hidden>
+      <p class="label" id="soon-label"></p>
+      <h1 tabindex="-1">Этот разбор скоро появится <span aria-hidden="true">🛠️</span></h1>
+      <p class="lead">Пока можно вернуться к&nbsp;списку или выбрать «Другое» и&nbsp;написать мне напрямую.</p>
+      <button class="back" type="button" data-back><span class="emoji" aria-hidden="true">👈</span>К списку процессов</button>
+    </section>
+  </div>
+</main>
+<script>
+  var PROCESSES = [
+    { id: "kp", emoji: "🧮", title: "Расчёты и КП по заявкам" },
+    { id: "ads", emoji: "📣", title: "Реклама, сайт, статьи" },
+    { id: "1c", emoji: "📊", title: "Бухгалтерия и 1С" },
+    { id: "answers", emoji: "💬", title: "Ответы клиентам" },
+    { id: "other", emoji: "🤔", title: "Другое" }
+  ];
+
+  function telegramLink(process) {
+    var text = "Здравствуйте! Я со страницы разбора процесса. Процесс: " + process + ". Хочу обсудить: ";
+    return "https://t.me/ahtlv?text=" + encodeURIComponent(text);
+  }
+
+  function show(id) {
+    document.querySelectorAll("main section").forEach(function (s) {
+      s.hidden = s.id !== id;
+    });
+    var heading = document.querySelector("#" + id + " h1");
+    if (heading) heading.focus();
+  }
+
+  var list = document.getElementById("process-list");
+  PROCESSES.forEach(function (p) {
+    var li = document.createElement("li");
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "option";
+    btn.innerHTML = '<span class="emoji" aria-hidden="true">' + p.emoji + "</span>";
+    btn.appendChild(document.createTextNode(p.title));
+    btn.addEventListener("click", function () {
+      if (p.id === "other") {
+        document.getElementById("other-telegram").href = telegramLink(p.title);
+        show("screen-other");
+      } else {
+        document.getElementById("soon-label").textContent = p.title;
+        show("screen-soon");
+      }
+    });
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  document.querySelectorAll("[data-back]").forEach(function (b) {
+    b.addEventListener("click", function () { show("screen-pick"); });
+  });
+
+  document.getElementById("screen-pick").hidden = false;
+</script>
+</body>
+</html>
